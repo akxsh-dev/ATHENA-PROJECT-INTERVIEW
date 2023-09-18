@@ -1,0 +1,43 @@
+""" Refer Derived-insights.zip to check the results of these following codes """
+
+
+%sql
+--displaying all the regional car listings with their brand and model names with the type of vehicle and transmission 
+select _c0,region,state,type, manufacturer,model,drive
+from craigslist_vehicles_new
+group by region, state,_c0,type, manufacturer,model,drive
+
+%sql
+--displaying regional car brands 
+select region,manufacturer, count(manufacturer) as count_of_cars
+from craigslist_vehicles_new
+group by region, manufacturer
+
+%sql
+--displaying regional total car brands and their types and transmission
+select region,manufacturer, count(manufacturer) as count_of_cars, drive, type
+from craigslist_vehicles_new
+group by region, manufacturer,drive, type
+
+%sql
+-- regional availibility of cars according to their condition
+select region,title_status, count(title_status) as no_of_the_car
+from craigslist_vehicles_new
+group by region, title_status
+order by no_of_the_car desc
+
+%sql
+-- available ready to sell cars that have no damage
+select region,manufacturer,model, count(manufacturer) as count_of_cars,title_status
+from craigslist_vehicles_new
+where title_status="clean"
+group by region,manufacturer,model, title_status
+order by count_of_cars desc
+
+%sql
+-- available ready to sell type of cars that have no damage
+select region,manufacturer,model, count(manufacturer) as count_of_cars,type,title_status
+from craigslist_vehicles_new
+where title_status="clean"
+group by region,manufacturer,model,type, title_status
+order by count_of_cars desc
