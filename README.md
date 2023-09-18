@@ -1,4 +1,4 @@
-# Craigslist-Vehicle-Listings
+# Craigslist-Vehicle-Listings Data Stratergy Using Azure Databricks and Apache Spark
 
 I established an Azure Data Lake Storage (ADLS) account, creating two distinct Gen2 containers—one dedicated to storing raw data and the other for the transformed dataset. After registering the application and obtaining the access keys, I seamlessly mounted ADLS to Databricks.
 
