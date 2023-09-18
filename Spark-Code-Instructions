@@ -1,0 +1,56 @@
+"""spark code instructions:"""
+
+
+-- Import these packages
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+--oAuth Connection of ADLS to Databricks
+configs = {"fs.azure.account.auth.type": "OAuth",
+"fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+"fs.azure.account.oauth2.client.id": "client_id",
+"fs.azure.account.oauth2.client.secret": 'client_key',
+"fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/Tenant_Id/oauth2/token"}
+
+--mount the raw data from ADLS into python notebook
+dbutils.fs.mount(
+source = "abfss://craigslist-vehicles-data@craigslistvehiclesdata.dfs.core.windows.net",
+mount_point = "/mnt/craigslistvehicle",
+extra_configs = configs)
+
+--check if successful
+%fs
+ls "/mnt/craigslistvehicle"
+
+--read the file from ADLS to python notebook
+
+craigslist_vehicles = spark.read.format("csv").option("header","true").option("inferSchema","true").load("/mnt/craigslistvehicle/raw-data/craigslist_vehicles.csv")
+craigslist_vehicles.show()
+
+
+
+--Transform the schema to appropriate Data types.
+
+craigslist_vehicles = craigslist_vehicles.withColumn("_c0",col("_c0").cast(IntegerType()))\
+    .withColumn("id",col("id").cast(IntegerType()))\
+    .withColumn("price",col("price").cast(IntegerType()))\
+    .withColumn("year",col("year").cast(IntegerType()))\
+    .withColumn("odometer",col("odometer").cast(IntegerType()))\
+    .withColumn("lat",col("lat").cast(FloatType()))\
+    .withColumn("long",col("long").cast(FloatType()))\
+    .withColumn("posting_date",col("posting_date").cast(TimestampType()))\
+    .withColumn("removal_date",col("removal_date").cast(TimestampType()))
+     
+
+--check if schema changed
+
+craigslist_vehicles.printSchema()
+
+--Mount the transformed data back into ADLS
+craigslist_vehicles.repartition(1).write.mode("overwrite").option("header",'true').csv("/mnt/craigslistvehicle/Transformed-data/craigslist_vehicles")
+
+--create a duplicate to run your analysis
+craigslist_vehicles.createOrReplaceTempView("craigslist_vehicles_new")
+
+
+--SQL refer Sql code file
